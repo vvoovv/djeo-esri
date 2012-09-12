@@ -143,6 +143,10 @@ return declare([Engine], {
 	},
 
 	prepare: function() {
+		var esriMap = this.esriMap;
+		this.areas = esriMap.addLayer(new esri.layers.GraphicsLayer());
+		this.lines = esriMap.addLayer(new esri.layers.GraphicsLayer());
+		this.points = esriMap.addLayer(new esri.layers.GraphicsLayer());
 		this.factories.Placemark.init();
 	},
 
@@ -150,22 +154,43 @@ return declare([Engine], {
 	},
 	
 	appendChild: function(child, feature) {
-		this.esriMap.graphics.add(child);
+		this._getParentLayer(feature).add(child);
 	},
 	
+	_getParentLayer: function(feature) {
+		var graphicsLayer;
+		if (feature.isPoint()) {
+			graphicsLayer = this.points;
+		}
+		else if (feature.isArea()) {
+			graphicsLayer = this.areas;
+		}
+		else {
+			graphicsLayer = this.lines;
+		}
+		return graphicsLayer;
+	},
+
 	onForFeature: function(feature, event, method, context) {
 		// check if we already have a listener for the event
 		if (!this._eventRegistry[event]) {
 			this._eventRegistry[event] = {
-				listener: aspect.after(
-					this.esriMap.graphics,
-					engineEvents[event],
-					lang.hitch(this, lang.partial(this._onEvent, event)),
-					true
-				),
+				listener: {},
 				features: {}
 			}
 		}
+		var listener = this._eventRegistry[event].listener,
+			featureType = feature.isPoint() ? "points" : (feature.isArea() ? "areas" : "lines")
+		;
+		if (!listener[featureType]) {
+			listener[featureType] = aspect.after(
+				this[featureType],
+				engineEvents[event],
+				lang.hitch(this, lang.partial(this._onEvent, event)),
+				true
+			)
+		}
+
 		var features = this._eventRegistry[event].features;
 		if (!features[feature.id]) {
 			features[feature.id] = [];

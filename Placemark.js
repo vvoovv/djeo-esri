@@ -56,7 +56,8 @@ return declare([P], {
 	init: function() {
 		var s = esri.symbol,
 			t = s.TextSymbol,
-			f = s.Font
+			f = s.Font,
+			esriMap = this.engine.esriMap
 		;
 		// filling textAligns in
 		textAligns = {
@@ -82,14 +83,17 @@ return declare([P], {
 				lighter: f.WEIGHT_LIGHTER
 			}
 		}
+
+		this.text = esriMap.addLayer(new esri.layers.GraphicsLayer());
 	},
 	
 	show: function(feature, show) {
 		var graphics = this.engine.esriMap.graphics,
-			graphic = feature.baseShapes[0]
+			graphic = feature.baseShapes[0],
+			graphicsLayer = this.engine._getParentLayer(feature)
 		;
-		if (show) graphics.add(graphic);
-		else graphics.remove(graphic);
+		if (show) graphicsLayer.add(graphic);
+		else graphicsLayer.remove(graphic);
 	},
 	
 	makePoint: function(feature, coords) {
@@ -255,7 +259,7 @@ return declare([P], {
 	makeText: function(feature, calculatedStyle) {
 		if (feature.textShapes) {
 			array.forEach(feature.textShapes, function(t) {
-				this.map.engine.esriMap.graphics.remove(t);
+				this.text.remove(t);
 			}, this);
 		}
 
@@ -277,7 +281,9 @@ return declare([P], {
 			feature.state.ts = textStyle;
 			
 			// halo is ignored
-			return this._makeTextShape(feature, label, textStyle);
+			var graphic = this._makeTextShape(feature, label, textStyle);
+			this.text.add(graphic);
+			feature.textShapes.push(graphic);
 		}
 	},
 	
