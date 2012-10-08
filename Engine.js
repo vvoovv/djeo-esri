@@ -17,7 +17,9 @@ supportedLayers["arcgis_webtiles"] = ["./ArcgisWebTiles", {}];
 var engineEvents = {
 	click: "onClick",
 	mouseover: "onMouseOver",
-	mouseout: "onMouseOut"
+	mouseout: "onMouseOut",
+	mousedown: "onMouseDown",
+	mouseup: "onMouseUp"
 },
 // class to be defined after esri namespace is available
 EmptyLayer
@@ -154,6 +156,8 @@ return declare([Engine], {
 	},
 	
 	appendChild: function(child, feature) {
+		// save reference to the feature under _djeo attribute
+		child._djeo = feature;
 		this._getParentLayer(feature).add(child);
 	},
 	
@@ -197,15 +201,12 @@ return declare([Engine], {
 		}
 		var handlerInfo = [method, context];
 		features[feature.id].push(handlerInfo);
-		array.forEach(feature.baseShapes, function(shape){
-			if (!shape._djeo) shape._djeo = feature;
-		});
 		return [feature.id, event, handlerInfo];
 	},
 	
 	_onEvent: function(eventType, event) {
 		var graphic = event.graphic;
-		if (graphic && graphic._djeo) {
+		if (graphic) {
 			var feature = graphic._djeo;
 			var handlers = this._eventRegistry[eventType].features[feature.id];
 			if (handlers) {
