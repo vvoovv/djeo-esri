@@ -9,7 +9,7 @@ define([
 	"djeo/_tiles"
 ], function(require, declare, lang, array, aspect, Engine, Placemark, supportedLayers){
 	
-// atching supportedLayers
+// attaching supportedLayers
 // arcgis_webtiles is implemented differently here than in the other engines
 supportedLayers = lang.mixin({}, supportedLayers);
 supportedLayers["arcgis_webtiles"] = ["./ArcgisWebTiles", {}];

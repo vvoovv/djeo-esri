@@ -1,13 +1,12 @@
 define([
 	"dojo/_base/declare",
 	"dojo/_base/lang",
-	"dojo/Evented",
 	"dojo/aspect",
 	"djeo/_base",
 	"esri/toolbars/edit"
-], function(declare, lang, Evented, aspect, djeo) {
+], function(declare, lang, aspect, djeo) {
 
-return declare([Evented], {
+return declare(null, {
 	
 	// feature currently being edited
 	feature: null,
