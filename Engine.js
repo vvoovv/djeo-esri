@@ -21,6 +21,11 @@ var engineEvents = {
 	mousedown: "onMouseDown",
 	mouseup: "onMouseUp"
 },
+mapEvents = {
+	zoom_changed: "onZoomEnd",
+	click: "onClick",
+	mousemove: "onMouseMove"
+},
 // class to be defined after esri namespace is available
 EmptyLayer
 ;
@@ -240,6 +245,21 @@ return declare([Engine], {
 		if (handlers.length == 0) {
 			delete features[fid];
 		}
+	},
+	
+	onForMap: function(event, method, context) {
+		return aspect.after(this.esriMap, mapEvents[event], function(e){
+			var p = esri.geometry.webMercatorToGeographic(e.mapPoint);
+			method.call(context, {
+				mapCoords: [p.x, p.y]
+			});
+		}, true);
+	},
+	
+	_on_zoom_changed: function(event, method, context) {
+		return aspect.after(this.esriMap, "onZoomEnd", function(){
+			method.call(context);
+		});
 	},
 	
 	zoomTo: function(extent) {
