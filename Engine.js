@@ -263,6 +263,10 @@ return declare([Engine], {
 	},
 	
 	zoomTo: function(extent) {
+		// A hack for a point
+		if (extent[0]==extent[2] && extent[1]==extent[3]) {
+			extent = [0.99999*extent[0], 0.99999*extent[1], 1.00001*extent[2], 1.00001*extent[3]];
+		}
 		this.esriMap.setExtent(
 			esri.geometry.geographicToWebMercator(new esri.geometry.Extent({
 				xmin: extent[0],
