@@ -12,7 +12,7 @@ define([
 // attaching supportedLayers
 // arcgis_webtiles is implemented differently here than in the other engines
 supportedLayers = lang.mixin({}, supportedLayers);
-supportedLayers["arcgis_webtiles"] = ["./ArcgisWebTiles", {}];
+supportedLayers["arcgis_webtiles"] = ["ArcgisWebTiles", {}];
 
 var engineEvents = {
 	click: "onClick",
@@ -85,12 +85,13 @@ return declare([Engine], {
 					if (this.isValidLayerId(layer)) {
 						var layerModuleId = this.getLayerModuleId(layer);
 						if (layerModuleId) {
-							requireModules.push(layerModuleId);
+							requireModules.push("djeo/"+layerModuleId, "./"+layerModuleId);
 						}
 						_layers.push(layer);
 					}
 				}
 				else {
+					requireModules.push("./" + layer.dependency);
 					_layers.push(layer);
 				}
 			}, this);

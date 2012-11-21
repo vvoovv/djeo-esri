@@ -1,7 +1,7 @@
 define([
 	"dojo/_base/declare", // declare
-	"djeo/WebTiles"
-], function(declare, WebTiles) {
+	"esri/jsapi"
+], function(declare) {
 
 var TiledWebMap = declare([esri.layers.TiledMapServiceLayer], {
 
@@ -45,29 +45,30 @@ var TiledWebMap = declare([esri.layers.TiledMapServiceLayer], {
 			]
 		});
 		this.url = kwArgs.url;
+		this.yFirst = kwArgs.yFirst;
 		this.numUrls = this.url.length;
 		this.loaded = true;
 		this.onLoad(this);
 	},
 
 	getTileUrl:function(level, row, col){
-		return this.url[row % this.numUrls]+"/"+level+"/"+col+"/"+row+".png";
+		var _1 = this.yFirst ? row : col,
+			_2 = this.yFirst ? col : row
+		;
+		return this.url[_2 % this.numUrls]+"/"+level+"/"+_1+"/"+_2+".png";
 	}
 });
 
 
-return declare([WebTiles], {
+return declare(null, {
 	
-	constructor: function(kwArgs, map) {
+	init: function() {
 		var tileLayer = new TiledWebMap({
-			url: this.url
+			url: this.url,
+			yFirst: this.yFirst
 		});
 		this._tileLayer = tileLayer;
 		this.map.engine.esriMap.addLayer(tileLayer);
-	},
-	
-	init: function() {
-		
 	}
 });
 
