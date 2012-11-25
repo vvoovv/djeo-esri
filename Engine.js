@@ -8,7 +8,7 @@ define([
 	"./Placemark",
 	"djeo/_tiles"
 ], function(require, declare, lang, array, aspect, Engine, Placemark, supportedLayers){
-	
+
 // attaching supportedLayers
 // arcgis_webtiles is implemented differently here than in the other engines
 supportedLayers = lang.mixin({}, supportedLayers);
@@ -124,12 +124,12 @@ return declare([Engine], {
 						spatialReference: this.spatialReference
 					})),
 					wrapAround180: true,
-					slider: false,
 					logo: false
 				});
 				this.esriMap = esriMap;
 				
 				aspect.after(esriMap, "onLoad", function(){
+					esriMap.hideZoomSlider();
 					readyFunction();
 				});
 				
@@ -286,13 +286,11 @@ return declare([Engine], {
 	},
 	
 	_setCamera: function(kwArgs) {
-		var center = new esri.geometry.Point(kwArgs.center, this.spatialReference);
-		this.esriMap.centerAndZoom(esri.geometry.geographicToWebMercator(center), kwArgs.zoom);
+		this.esriMap.centerAndZoom(Placemark.makePoint(kwArgs.center), kwArgs.zoom);
 	},
 	
 	_set_center: function(center) {
-		center = new esri.geometry.Point(center, this.spatialReference);
-		this.esriMap.centerAt(esri.geometry.geographicToWebMercator(center));
+		this.esriMap.centerAt(Placemark.makePoint(center));
 	},
 	
 	_get_center: function() {

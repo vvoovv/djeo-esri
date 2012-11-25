@@ -4,8 +4,9 @@ define([
 	"dojo/_base/array", // forEach
 	"dojo/_base/Color",
 	"djeo/_base",
+	"djeo/util/_base",
 	"djeo/common/Placemark"
-], function(declare, lang, array, Color, djeo, P) {
+], function(declare, lang, array, Color, djeo, u, P) {
 	
 var textAligns,
 	fontConsts,
@@ -46,8 +47,11 @@ function _updateSimpleLineSymbol(symbol, stroke, strokeOpacity, strokeWidth) {
 	}
 }
 
+function makePoint(coords) {
+	return esri.geometry.geographicToWebMercator( new esri.geometry.Point(coords[0], coords[1], {wkid: 4326}) );
+};
 
-return declare([P], {
+var Placemark = declare([P], {
 	
 	constructor: function(kwArgs) {
 		lang.mixin(this, kwArgs);
@@ -179,10 +183,7 @@ return declare([P], {
 			graphic.setSymbol(symbol);
 		}
 		else {
-			var geometry = new esri.geometry.Point(coords[0], coords[1], {wkid: 4326})
-				graphic = new esri.Graphic(esri.geometry.geographicToWebMercator(geometry), symbol)
-			;
-			feature.baseShapes[0] = graphic;
+			feature.baseShapes[0] = new esri.Graphic(makePoint(coords), symbol);
 		}
 	},
 	
@@ -352,7 +353,7 @@ return declare([P], {
 			
 			var coords = feature.getCoords(),
 				graphic = new esri.Graphic(
-					esri.geometry.geographicToWebMercator( new esri.geometry.Point(coords[0], coords[1], new esri.SpatialReference({ "wkid": 4326 })) ),
+					makePoint(coords),
 					textSymbol
 				)
 			;
@@ -361,12 +362,26 @@ return declare([P], {
 	},
 	
 	setCoords: function(coords, feature) {
-		feature.baseShapes[0].setGeometry(
-			esri.geometry.geographicToWebMercator(
-				new esri.geometry.Point(coords[0], coords[1], {wkid: 4326})
-			)
-		);
+		var esriPoint = makePoint(coords);
+		feature.baseShapes[0].setGeometry(esriPoint);
+		if (feature.textShapes) {
+			feature.textShapes[0].setGeometry(esriPoint);
+		}
+	},
+	
+	setOrientation: function(o, feature) {
+		// orientation is actually heading
+		var graphic = feature.baseShapes[0],
+			symbol = graphic.symbol,
+			heading = lang.isObject(o) ? o.heading : o
+		;
+		symbol.setAngle(u.radToDeg(o));
+		graphic.setSymbol(symbol);
 	}
 });
+
+Placemark.makePoint = makePoint;
+
+return Placemark;
 
 });
