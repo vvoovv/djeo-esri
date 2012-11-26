@@ -91,13 +91,17 @@ var Placemark = declare([P], {
 		this.text = esriMap.addLayer(new esri.layers.GraphicsLayer());
 	},
 	
-	show: function(feature, show) {
-		var graphics = this.engine.esriMap.graphics,
-			graphic = feature.baseShapes[0],
+	remove: function(feature) {
+		var graphic = feature.baseShapes[0],
 			graphicsLayer = this.engine._getParentLayer(feature)
 		;
-		if (show) graphicsLayer.add(graphic);
-		else graphicsLayer.remove(graphic);
+		graphicsLayer.remove(graphic);
+	},
+	
+	show: function(feature, show) {
+		var graphic = feature.baseShapes[0];
+		if (show) graphic.show();
+		else graphic.hide();
 	},
 	
 	makePoint: function(feature, coords) {
