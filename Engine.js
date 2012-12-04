@@ -252,7 +252,8 @@ return declare([Engine], {
 		return aspect.after(this.esriMap, mapEvents[event], function(e){
 			var p = esri.geometry.webMercatorToGeographic(e.mapPoint);
 			method.call(context, {
-				mapCoords: [p.x, p.y]
+				mapCoords: [p.x, p.y],
+				nativeEvent: e
 			});
 		}, true);
 	},
