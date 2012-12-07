@@ -27,10 +27,13 @@ mapEvents = {
 	mousemove: "onMouseMove"
 },
 // class to be defined after esri namespace is available
-EmptyLayer
+EmptyLayer,
+TiledWebMap
 ;
 
 function _defineClasses() {
+	/*
+	// Generic empty layer, getLevel/setLevel is not available for esri.Map 
 	EmptyLayer = declare([esri.layers.DynamicMapServiceLayer], {
 	
 		constructor: function(esriMap) {
@@ -41,7 +44,14 @@ function _defineClasses() {
 		},
 
 		getImageUrl: function(extent, width, height, callback) {
-			// dp nothing here
+			// do nothing here
+		}
+	});
+	*/
+	// getLevel/setLevel is available for esri.Map since the class is based on esri.layers.TiledMapServiceLayer
+	EmptyLayer = declare([TiledWebMap], {
+		getTileUrl:function(level, row, col){
+			// do nothing here
 		}
 	});
 }
@@ -71,7 +81,7 @@ return declare([Engine], {
 		// The code that loads layers, is borrowed and partially modified from Map._onEngineReady
 		var map = this.map,
 			layers = map.layers,
-			requireModules = []
+			requireModules = ["./_TiledWebMap"]
 		;
 		if (layers) {
 			if (lang.isString(layers)) {
@@ -108,9 +118,10 @@ return declare([Engine], {
 				]
 			},
 			requireModules,
-			lang.hitch(this, function() {
+			lang.hitch(this, function(_TiledWebMap) {
 				// checking if classes are defined
 				if (!EmptyLayer) {
+					TiledWebMap = _TiledWebMap;
 					_defineClasses();
 				}
 				map.projection = "EPSG:4326";
