@@ -149,8 +149,9 @@ return declare([Engine], {
 					for (var i=0; i<layers.length; i++) {
 						var layer = layers[i];
 						if (lang.isString(layer) && this.getLayerModuleId(layer)) {
-							// arguments[i] is layer constructor
-							this.setLayerConstructor(layer, arguments[i]);
+							// arguments[1+i] is layer constructor
+							// argument[0]===_TiledWebMap
+							this.setLayerConstructor(layer, arguments[1+i]);
 						}
 						this.enableLayer(layer, true);
 					}
