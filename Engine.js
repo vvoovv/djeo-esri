@@ -312,6 +312,8 @@ return declare([Engine], {
 	},
 	
 	_set_zoom: function(zoom) {
+		var map = this.map;
+		if (zoom < map.minZoom || zoom > map.maxZoom) return;
 		this.esriMap.setLevel(zoom);
 	},
 	
