@@ -276,6 +276,12 @@ return declare([Engine], {
 		});
 	},
 	
+	_on_extent_changed: function(event, method, context) {
+		return aspect.after(this.esriMap, "onExtentChange", function(){
+			method.call(context);
+		});
+	},
+	
 	zoomTo: function(extent) {
 		// A hack for a point
 		if (extent[0]==extent[2] && extent[1]==extent[3]) {
@@ -319,6 +325,11 @@ return declare([Engine], {
 	
 	_get_zoom: function() {
 		return this.esriMap.getLevel();
+	},
+	
+	_get_extent: function() {
+		var extent = esri.geometry.webMercatorToGeographic(this.esriMap.extent);
+		return [extent.xmin, extent.ymin, extent.xmax, extent.ymax];
 	},
 	
 	_appendDiv: function(div) {
