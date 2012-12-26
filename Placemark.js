@@ -283,7 +283,7 @@ var Placemark = declare([P], {
 		if (label) {
 			feature.textShapes = [];
 			// ts states for "text style"
-			feature.state.ts = textStyle;
+			feature.reg.ts = textStyle;
 			
 			// halo is ignored
 			var graphic = this._makeTextShape(feature, label, textStyle);
@@ -311,8 +311,8 @@ var Placemark = declare([P], {
 		
 		if (createShape) {
 			var textSymbol = new esri.symbol.TextSymbol(label),
-				// feature.state.cs is calculatedStyle
-				scale = P.getScale(feature.state.cs),
+				// feature.reg.cs is calculatedStyle
+				scale = P.getScale(feature.reg.cs),
 				dx = ("dx" in textStyle) ? scale*textStyle.dx : 0,
 				dy = ("dy" in textStyle) ? scale*textStyle.dy : 0,
 				fill = textStyle.fill
@@ -353,7 +353,7 @@ var Placemark = declare([P], {
 				textSymbol.setFont(font)
 			}
 			
-			//this._makeFont(textSymbol, textStyle, P.getScale(feature.state.cs));
+			//this._makeFont(textSymbol, textStyle, P.getScale(feature.reg.cs));
 			
 			var coords = feature.getCoords(),
 				graphic = new esri.Graphic(
