@@ -187,6 +187,11 @@ var Placemark = declare([P], {
 			graphic.setSymbol(symbol);
 		}
 		else {
+			var heading = feature.orientation;
+			if (heading !== undefined) {
+				if (lang.isObject(heading)) heading = heading.heading;
+				symbol.setAngle(u.radToDeg(heading));
+			}
 			feature.baseShapes[0] = new esri.Graphic(makePoint(coords), symbol);
 		}
 	},
@@ -376,8 +381,7 @@ var Placemark = declare([P], {
 	setOrientation: function(o, feature) {
 		// orientation is actually heading
 		var graphic = feature.baseShapes[0],
-			symbol = graphic.symbol,
-			heading = lang.isObject(o) ? o.heading : o
+			symbol = graphic.symbol
 		;
 		symbol.setAngle(u.radToDeg(o));
 		graphic.setSymbol(symbol);
