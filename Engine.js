@@ -113,8 +113,7 @@ return declare([Engine], {
 		require(
 			{
 				packages: [
-					{location:'../djeo-esri/library/3.1/jsapi/js/esri',name:'esri'},
-					{location:'../djeo/dojox',name:'dojox'}
+					{location:'../djeo-esri/library/3.1/jsapi/js/esri',name:'esri'}
 				]
 			},
 			requireModules,

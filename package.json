@@ -1,0 +1,17 @@
+{
+	"name": "djeo-esri",
+	"author": "Vladimir Elistratov",
+	"description": "ArcGIS API for JavaScript engine for the djeo library",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/vvoovv/djeo-esri"
+	},
+	"bugs": "https://github.com/vvoovv/djeo-esri/issues",
+	"dependencies": {
+		"djeo": "current"
+	},
+	"keywords": ["djeo", "geo", "ArcGIS API for JavaScript"],
+	"homepage": "http://djeo.org",
+	"icon": "http://djeo.github.com/djeo25.png",
+	"dojoBuild": "djeo-esri.profile.js"
+}
