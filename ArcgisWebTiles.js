@@ -1,6 +1,7 @@
 define([
-	"dojo/_base/declare"
-], function(declare) {
+	"dojo/_base/declare",
+	"esri/layers/ArcGISTiledMapServiceLayer"
+], function(declare, ArcGISTiledMapServiceLayer) {
 
 return declare([], {
 	
@@ -8,7 +9,7 @@ return declare([], {
 		this.map = map;
 		// paramStr is actually url
 		var url = kwArgs.paramStr ? kwArgs.paramStr : this.url,
-			layer = new esri.layers.ArcGISTiledMapServiceLayer(url)
+			layer = new ArcGISTiledMapServiceLayer(url)
 		;
 		this._layer = layer;
 		this.map.engine.esriMap.addLayer(layer);

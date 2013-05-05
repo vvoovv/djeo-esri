@@ -5,9 +5,8 @@ define([
 	"dojo/_base/array", // forEach
 	"dojo/aspect", // after
 	"djeo/Engine",
-	"./Placemark",
 	"djeo/_tiles"
-], function(require, declare, lang, array, aspect, Engine, Placemark, supportedLayers){
+], function(require, declare, lang, array, aspect, Engine, supportedLayers){
 
 // attaching supportedLayers
 // arcgis_webtiles is implemented differently here than in the other engines
@@ -27,34 +26,9 @@ mapEvents = {
 	mousemove: "onMouseMove"
 },
 // class to be defined after esri namespace is available
-EmptyLayer,
-TiledWebMap
+Placemark,
+GraphicsLayer
 ;
-
-function _defineClasses() {
-	/*
-	// Generic empty layer, getLevel/setLevel is not available for esri.Map 
-	EmptyLayer = declare([esri.layers.DynamicMapServiceLayer], {
-	
-		constructor: function(esriMap) {
-			this.spatialReference = esriMap.spatialReference;
-			this.initialExtent = this.fullExtent = esriMap.extent;
-			this.loaded = true;
-			this.onLoad(this);
-		},
-
-		getImageUrl: function(extent, width, height, callback) {
-			// do nothing here
-		}
-	});
-	*/
-	// getLevel/setLevel is available for esri.Map since the class is based on esri.layers.TiledMapServiceLayer
-	EmptyLayer = declare([TiledWebMap], {
-		getTileUrl:function(level, row, col){
-			// do nothing here
-		}
-	});
-}
 
 return declare([Engine], {
 	
@@ -68,11 +42,6 @@ return declare([Engine], {
 		lang.mixin(this.ignoredDependencies, {"Highlight": 1, "Tooltip": 1});
 		this._eventRegistry = {};
 		this._supportedLayers = supportedLayers;
-		// initialize basic factories
-		this._initBasicFactories(Placemark({
-			map: this.map,
-			engine: this
-		}));
 	},
 	
 	initialize: function(/* Function */readyFunction) {
@@ -81,7 +50,13 @@ return declare([Engine], {
 		// The code that loads layers, is borrowed and partially modified from Map._onEngineReady
 		var map = this.map,
 			layers = map.layers,
-			requireModules = ["./_TiledWebMap"]
+			requireModules = [
+				"./Placemark",
+				"esri/map",
+				"esri/layers/GraphicsLayer",
+				"esri/geometry/Extent"
+			],
+			moduleOffset = requireModules.length
 		;
 		if (layers) {
 			if (lang.isString(layers)) {
@@ -108,64 +83,59 @@ return declare([Engine], {
 			layers = _layers;
 			map._layerLoaded = true;
 		};
-		requireModules.push("esri/jsapi");
 		
 		require(
 			{
 				packages: [
-					{location:'../djeo-esri/library/3.1/jsapi/js/esri',name:'esri'}
+					{location:'../djeo-esri/library/3.4/3.4compact/js/esri',name:'esri'}
 				]
 			},
-			requireModules,
-			lang.hitch(this, function(_TiledWebMap) {
-				// checking if classes are defined
-				if (!EmptyLayer) {
-					TiledWebMap = _TiledWebMap;
-					_defineClasses();
-				}
-				map.projection = "EPSG:4326";
-				this.spatialReference = {wkid:4326};
-				var esriMap = new esri.Map(map.container, {
-					extent: esri.geometry.geographicToWebMercator(new esri.geometry.Extent({
-						xmin: -180,
-						ymin: -75,
-						xmax: 75,
-						ymax: 71.91,
-						spatialReference: this.spatialReference
-					})),
-					wrapAround180: true,
-					logo: false
-				});
-				this.esriMap = esriMap;
-				
-				aspect.after(esriMap, "onLoad", function(){
-					esriMap.hideZoomSlider();
-					readyFunction();
-				});
-				
-				// load layers
-				if (layers && layers.length) {
-					for (var i=0; i<layers.length; i++) {
-						var layer = layers[i];
-						if (lang.isString(layer) && this.getLayerModuleId(layer)) {
-							// arguments[1+i] is layer constructor
-							// argument[0]===_TiledWebMap
-							this.setLayerConstructor(layer, arguments[1+i]);
-						}
-						this.enableLayer(layer, true);
+			["esri/jsapi", "xstyle/css!esri/css/esri.css"],
+			lang.hitch(this, function() {
+				require(requireModules, lang.hitch(this, function(_Placemark, Map, _GraphicsLayer, _Extent) {
+					// checking if classes are defined
+					if (!Placemark) {
+						Placemark = _Placemark;
+						// initialize basic factories
+						this._initBasicFactories(Placemark({
+							map: this.map,
+							engine: this
+						}));
+	
+						GraphicsLayer = _GraphicsLayer;
+						Extent = _Extent;
 					}
-				}
-				else {
-					esriMap.addLayer(new EmptyLayer(esriMap));
-				}
-		}));
+					map.projection = "EPSG:4326";
+					this.spatialReference = {wkid:4326};
+					var esriMap = new Map(map.container, {
+						slider: false,
+						logo: false
+					});
+					this.esriMap = esriMap;
+					
+					// load layers
+					if (layers && layers.length) {
+						for (var i=0; i<layers.length; i++) {
+							var layer = layers[i];
+							if (lang.isString(layer) && this.getLayerModuleId(layer)) {
+								// arguments[moduleOffset+i] is layer constructor
+								this.setLayerConstructor(layer, arguments[moduleOffset+i]);
+							}
+							this.enableLayer(layer, true);
+						}
+					}
+					
+					readyFunction();
+				}));
+			})
+		);
 	},
 
 	prepare: function() {
 		var esriMap = this.esriMap;
-		this.areas = esriMap.addLayer(new esri.layers.GraphicsLayer());
-		this.lines = esriMap.addLayer(new esri.layers.GraphicsLayer());
-		this.points = esriMap.addLayer(new esri.layers.GraphicsLayer());
+		this.areas = esriMap.addLayer(new GraphicsLayer());
+		this.lines = esriMap.addLayer(new GraphicsLayer());
+		this.points = esriMap.addLayer(new GraphicsLayer());
 		this.factories.Placemark.init();
 	},
 
@@ -287,13 +257,13 @@ return declare([Engine], {
 			extent = [0.99999*extent[0], 0.99999*extent[1], 1.00001*extent[2], 1.00001*extent[3]];
 		}
 		this.esriMap.setExtent(
-			esri.geometry.geographicToWebMercator(new esri.geometry.Extent({
+			new Extent({
 				xmin: extent[0],
 				ymin: extent[1],
 				xmax: extent[2],
 				ymax: extent[3],
 				spatialReference: this.spatialReference
-			})),
+			}),
 			true
 		);
 	},

@@ -5,8 +5,19 @@ define([
 	"dojo/_base/Color",
 	"djeo/_base",
 	"djeo/util/_base",
-	"djeo/common/Placemark"
-], function(declare, lang, array, Color, djeo, u, P) {
+	"djeo/common/Placemark",
+	"esri/layers/GraphicsLayer",
+	"esri/graphic",
+	"esri/geometry/Polygon",
+	"esri/geometry/Polyline",
+	"esri/geometry/Point",
+	"esri/symbols/SimpleFillSymbol",
+	"esri/symbols/SimpleLineSymbol",
+	"esri/symbols/PictureMarkerSymbol",
+	"esri/symbols/TextSymbol",
+	"esri/symbols/Font",
+	"esri/geometry/webMercatorUtils"
+], function(declare, lang, array, Color, djeo, u, P, GraphicsLayer, Graphic, Polygon, Polyline, Point, SimpleFillSymbol, SimpleLineSymbol, PictureMarkerSymbol, TextSymbol, Font, webMercatorUtils) {
 	
 var textAligns,
 	fontConsts,
@@ -30,7 +41,7 @@ function _createSimpleLineSymbol(stroke, strokeOpacity, strokeWidth) {
 	if (strokeOpacity!==undefined) {
 		outlineColor.a = strokeOpacity;
 	}
-	return new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, outlineColor, strokeWidth);
+	return new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, outlineColor, strokeWidth);
 }
 
 // helper function
@@ -48,7 +59,7 @@ function _updateSimpleLineSymbol(symbol, stroke, strokeOpacity, strokeWidth) {
 }
 
 function makePoint(coords) {
-	return esri.geometry.geographicToWebMercator( new esri.geometry.Point(coords[0], coords[1], {wkid: 4326}) );
+	return webMercatorUtils.geographicToWebMercator(new Point(coords[0], coords[1], {wkid: 4326}));
 };
 
 var Placemark = declare([P], {
@@ -58,9 +69,8 @@ var Placemark = declare([P], {
 	},
 	
 	init: function() {
-		var s = esri.symbol,
-			t = s.TextSymbol,
-			f = s.Font,
+		var t = TextSymbol,
+			f = Font,
 			esriMap = this.engine.esriMap
 		;
 		// filling textAligns in
@@ -88,7 +98,7 @@ var Placemark = declare([P], {
 			}
 		}
 
-		this.text = esriMap.addLayer(new esri.layers.GraphicsLayer());
+		this.text = esriMap.addLayer(new GraphicsLayer());
 	},
 	
 	remove: function(feature) {
@@ -111,27 +121,27 @@ var Placemark = declare([P], {
 	},
 	
 	makeLineString: function(feature, coords) {
-		var polyline = new esri.geometry.Polyline({
+		var polyline = new Polyline({
 			paths: [coords],
 			spatialReference: this.map.engine.spatialReference
 		});
-		return new esri.Graphic(esri.geometry.geographicToWebMercator(polyline));
+		return new Graphic(polyline);
 	},
 
 	makeMultiLineString: function(feature, coords) {
-		var polyline = new esri.geometry.Polyline({
+		var polyline = new Polyline({
 			paths: coords,
 			spatialReference: this.map.engine.spatialReference
 		});
-		return new esri.Graphic(esri.geometry.geographicToWebMercator(polyline));
+		return new Graphic(polyline);
 	},
 
 	makePolygon: function(feature, coords) {
-		var polygon = new esri.geometry.Polygon({
+		var polygon = new Polygon({
 			rings: coords,
 			spatialReference: this.map.engine.spatialReference
 		});
-		return new esri.Graphic(esri.geometry.geographicToWebMercator(polygon));
+		return new Graphic(polygon);
 	},
 	
 	makeMultiPolygon: function(feature, coords) {
@@ -153,7 +163,7 @@ var Placemark = declare([P], {
 			src = P.getImgSrc(calculatedStyle, specificStyle, specificShapeStyle),
 			isVectorShape = true,
 			scale = P.getScale(calculatedStyle, specificStyle, specificShapeStyle),
-			symbol = graphic ? graphic.symbol : new esri.symbol.PictureMarkerSymbol();
+			symbol = graphic ? graphic.symbol : new PictureMarkerSymbol();
 		;
 		
 		if (!shapeType && src) isVectorShape = false;
@@ -192,7 +202,7 @@ var Placemark = declare([P], {
 				if (lang.isObject(heading)) heading = heading.heading;
 				symbol.setAngle(u.radToDeg(heading));
 			}
-			feature.baseShapes[0] = new esri.Graphic(makePoint(coords), symbol);
+			feature.baseShapes[0] = new Graphic(makePoint(coords), symbol);
 		}
 	},
 	
@@ -256,8 +266,8 @@ var Placemark = declare([P], {
 			if (fillOpacity !== undefined) {
 				fillColor.a = fillOpacity;
 			}
-			symbol = new esri.symbol.SimpleFillSymbol(
-				esri.symbol.SimpleFillSymbol.STYLE_SOLID,
+			symbol = new SimpleFillSymbol(
+				SimpleFillSymbol.STYLE_SOLID,
 				strokeWidth ? _createSimpleLineSymbol(stroke, strokeOpacity, strokeWidth) : null,
 				fillColor
 			);
@@ -315,7 +325,7 @@ var Placemark = declare([P], {
 		}
 		
 		if (createShape) {
-			var textSymbol = new esri.symbol.TextSymbol(label),
+			var textSymbol = new TextSymbol(label),
 				// feature.reg.cs is calculatedStyle
 				scale = P.getScale(feature.reg.cs),
 				dx = ("dx" in textStyle) ? scale*textStyle.dx : 0,
@@ -338,7 +348,7 @@ var Placemark = declare([P], {
 			var font;
 			for (var attr in fontAttrs) {
 				if (attr in textStyle) {
-					if (!font) font = new esri.symbol.Font();
+					if (!font) font = new Font();
 					// check if attr can accept only predefined set of values
 					if (fontConsts[attr]) {
 						if (fontConsts[attr][ textStyle[attr] ]) {
@@ -361,7 +371,7 @@ var Placemark = declare([P], {
 			//this._makeFont(textSymbol, textStyle, P.getScale(feature.reg.cs));
 			
 			var coords = feature.getCoords(),
-				graphic = new esri.Graphic(
+				graphic = new Graphic(
 					makePoint(coords),
 					textSymbol
 				)
