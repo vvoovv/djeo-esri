@@ -27,7 +27,9 @@ mapEvents = {
 },
 // class to be defined after esri namespace is available
 Placemark,
-GraphicsLayer
+GraphicsLayer,
+Extent,
+webMercatorUtils
 ;
 
 return declare([Engine], {
@@ -54,7 +56,8 @@ return declare([Engine], {
 				"./Placemark",
 				"esri/map",
 				"esri/layers/GraphicsLayer",
-				"esri/geometry/Extent"
+				"esri/geometry/Extent",
+				"esri/geometry/webMercatorUtils"
 			],
 			moduleOffset = requireModules.length
 		;
@@ -76,7 +79,7 @@ return declare([Engine], {
 					}
 				}
 				else {
-					requireModules.push("./" + layer.dependency);
+					if (layer.dependency) requireModules.push("./" + layer.dependency);
 					_layers.push(layer);
 				}
 			}, this);
@@ -92,7 +95,7 @@ return declare([Engine], {
 			},
 			["esri/jsapi", "xstyle/css!esri/css/esri.css"],
 			lang.hitch(this, function() {
-				require(requireModules, lang.hitch(this, function(_Placemark, Map, _GraphicsLayer, _Extent) {
+				require(requireModules, lang.hitch(this, function(_Placemark, Map, _GraphicsLayer, _Extent, _webMercatorUtils) {
 					// checking if classes are defined
 					if (!Placemark) {
 						Placemark = _Placemark;
@@ -104,12 +107,20 @@ return declare([Engine], {
 	
 						GraphicsLayer = _GraphicsLayer;
 						Extent = _Extent;
+						webMercatorUtils = _webMercatorUtils;
 					}
 					map.projection = "EPSG:4326";
-					this.spatialReference = {wkid:4326};
+					this.spatialReference = {wkid: 4326};
 					var esriMap = new Map(map.container, {
 						slider: false,
-						logo: false
+						logo: false,
+						extent: webMercatorUtils.geographicToWebMercator(new Extent({
+							xmin: -180,
+							ymin: -75,
+							xmax: 180,
+							ymax: 75,
+							spatialReference: this.spatialReference
+						}))
 					});
 					this.esriMap = esriMap;
 					
@@ -231,7 +242,7 @@ return declare([Engine], {
 	
 	onForMap: function(event, method, context) {
 		return aspect.after(this.esriMap, mapEvents[event], function(e){
-			var p = esri.geometry.webMercatorToGeographic(e.mapPoint);
+			var p = webMercatorUtils.webMercatorToGeographic(e.mapPoint);
 			method.call(context, {
 				mapCoords: [p.x, p.y],
 				nativeEvent: e
@@ -282,7 +293,7 @@ return declare([Engine], {
 	},
 	
 	_get_center: function() {
-		var center = esri.geometry.webMercatorToGeographic(this.esriMap.extent.getCenter());
+		var center = webMercatorUtils.webMercatorToGeographic(this.esriMap.extent.getCenter());
 		return [center.x, center.y];
 	},
 	
@@ -297,7 +308,7 @@ return declare([Engine], {
 	},
 	
 	_get_extent: function() {
-		var extent = esri.geometry.webMercatorToGeographic(this.esriMap.extent);
+		var extent = webMercatorUtils.webMercatorToGeographic(this.esriMap.extent);
 		return [extent.xmin, extent.ymin, extent.xmax, extent.ymax];
 	},
 	
