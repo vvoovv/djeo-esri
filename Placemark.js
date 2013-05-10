@@ -103,9 +103,13 @@ var Placemark = declare([P], {
 	
 	remove: function(feature) {
 		var graphic = feature.baseShapes[0],
+			textShapes = feature.textShapes,
 			graphicsLayer = this.engine._getParentLayer(feature)
 		;
 		graphicsLayer.remove(graphic);
+		if (textShapes && textShapes.length) {
+			this.text.remove(textShapes[0]);
+		}
 	},
 	
 	show: function(feature, show) {
