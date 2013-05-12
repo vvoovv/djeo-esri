@@ -111,7 +111,7 @@ return declare([Engine], {
 					}
 					map.projection = "EPSG:4326";
 					this.spatialReference = {wkid: 4326};
-					var esriMap = new Map(map.container, {
+					var constructorOptions = lang.mixin({
 						slider: false,
 						logo: false,
 						extent: webMercatorUtils.geographicToWebMercator(new Extent({
@@ -121,7 +121,8 @@ return declare([Engine], {
 							ymax: 75,
 							spatialReference: this.spatialReference
 						}))
-					});
+					}, this.constructorOptions || {});
+					var esriMap = new Map(map.container, constructorOptions);
 					this.esriMap = esriMap;
 					
 					// load layers
@@ -267,7 +268,8 @@ return declare([Engine], {
 		if (extent[0]==extent[2] && extent[1]==extent[3]) {
 			extent = [0.99999*extent[0], 0.99999*extent[1], 1.00001*extent[2], 1.00001*extent[3]];
 		}
-		this.esriMap.setExtent(
+		// return Deferred
+		return this.esriMap.setExtent(
 			new Extent({
 				xmin: extent[0],
 				ymin: extent[1],
@@ -285,11 +287,13 @@ return declare([Engine], {
 	},
 	
 	_setCamera: function(kwArgs) {
-		this.esriMap.centerAndZoom(Placemark.makePoint(kwArgs.center), kwArgs.zoom);
+		// return Deferred
+		return this.esriMap.centerAndZoom(Placemark.makePoint(kwArgs.center), kwArgs.zoom);
 	},
 	
 	_set_center: function(center) {
-		this.esriMap.centerAt(Placemark.makePoint(center));
+		// return Deferred
+		return this.esriMap.centerAt(Placemark.makePoint(center));
 	},
 	
 	_get_center: function() {
@@ -300,7 +304,8 @@ return declare([Engine], {
 	_set_zoom: function(zoom) {
 		var map = this.map;
 		if (zoom < map.minZoom || zoom > map.maxZoom) return;
-		this.esriMap.setLevel(zoom);
+		// return Deferred
+		return this.esriMap.setLevel(zoom);
 	},
 	
 	_get_zoom: function() {
