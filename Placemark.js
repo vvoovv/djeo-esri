@@ -113,7 +113,13 @@ var Placemark = declare([P], {
 	},
 	
 	show: function(feature, show) {
-		var graphic = feature.baseShapes[0];
+		var graphic = feature.baseShapes[0],
+			textShapes = feature.textShapes
+		;
+		if (textShapes && textShapes.length) {
+			if (show) textShapes[0].show();
+			else textShapes[0].hide();
+		}
 		if (show) graphic.show();
 		else graphic.hide();
 	},
