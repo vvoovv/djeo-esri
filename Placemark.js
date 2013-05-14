@@ -99,6 +99,7 @@ var Placemark = declare([P], {
 		}
 
 		this.text = esriMap.addLayer(new GraphicsLayer());
+		this.engine.text = this.text;
 	},
 	
 	remove: function(feature) {
@@ -312,6 +313,7 @@ var Placemark = declare([P], {
 			
 			// halo is ignored
 			var graphic = this._makeTextShape(feature, label, textStyle);
+			graphic._djeo = feature;
 			this.text.add(graphic);
 			feature.textShapes.push(graphic);
 		}

@@ -191,9 +191,17 @@ return declare([Engine], {
 				engineEvents[event],
 				lang.hitch(this, lang.partial(this._onEvent, event)),
 				true
-			)
+			);
 		}
-
+		// listening for textevents
+		if (!listener.text) {
+			listener.text = aspect.after(
+				this.text,
+				engineEvents[event],
+				lang.hitch(this, lang.partial(this._onEvent, event)),
+				this
+			);
+		}
 		var features = this._eventRegistry[event].features;
 		if (!features[feature.id]) {
 			features[feature.id] = [];
