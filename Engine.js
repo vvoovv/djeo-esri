@@ -99,16 +99,15 @@ return declare([Engine], {
 					// checking if classes are defined
 					if (!Placemark) {
 						Placemark = _Placemark;
-						// initialize basic factories
-						this._initBasicFactories(Placemark({
-							map: this.map,
-							engine: this
-						}));
-	
 						GraphicsLayer = _GraphicsLayer;
 						Extent = _Extent;
 						webMercatorUtils = _webMercatorUtils;
 					}
+					// initialize basic factories
+					this._initBasicFactories(Placemark({
+						map: this.map,
+						engine: this
+					}));
 					map.projection = "EPSG:4326";
 					this.spatialReference = {wkid: 4326};
 					var constructorOptions = lang.mixin({
