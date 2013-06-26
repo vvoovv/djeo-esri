@@ -187,6 +187,7 @@ var Placemark = declare([P], {
 
 		var size = isVectorShape ? P.getSize(calculatedStyle, specificStyle, specificShapeStyle) : P.getImgSize(calculatedStyle, specificStyle, specificShapeStyle);
 		if (size) {
+			if (size[0]==0 && size[1]==0) return;
 			var anchor = isVectorShape ? [size[0]/2, size[1]/2] : P.getAnchor(calculatedStyle, specificStyle, specificShapeStyle, size);
 			// anchor in ArcGIS is relative to the center of the image; y axis is pointing upwards
 			anchor = [-anchor[0] + size[0]/2, anchor[1] - size[1]/2];
