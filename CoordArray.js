@@ -28,13 +28,6 @@ return declare(null, {
 			geometry.setPoint(0, index, point);
 			graphic.setGeometry(geometry);
 		}
-	},
-
-	_setShapes: function(feature) {
-		var pathString = this.engine.factories.Placemark.makePathString(feature.getCoords(), 1);
-		array.forEach(feature.baseShapes, function(shape){
-			shape.setShape(pathString);
-		});
 	}
 });
 
