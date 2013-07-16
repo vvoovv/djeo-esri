@@ -295,14 +295,7 @@ var Placemark = declare([P], {
 			}, this);
 		}
 
-		var specificStyle;
-		if (feature.isPoint()) {
-			specificStyle = calculatedStyle.point;
-		}
-		else if (feature.isArea()) {
-			specificStyle = calculatedStyle.area;
-		}
-		var textStyle = P.get("text", calculatedStyle, specificStyle);
+		var textStyle = P.getTextStyle(feature, calculatedStyle);
 		if (!textStyle) return;
 
 		var label = textStyle.label || this._getLabel(feature, textStyle);
