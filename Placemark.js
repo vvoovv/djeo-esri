@@ -121,8 +121,10 @@ var Placemark = declare([P], {
 			if (show) textShapes[0].show();
 			else textShapes[0].hide();
 		}
-		if (show) graphic.show();
-		else graphic.hide();
+		if (graphic) {
+			if (show) graphic.show();
+			else graphic.hide();
+		}
 	},
 	
 	makePoint: function(feature, coords) {
