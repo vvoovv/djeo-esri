@@ -390,7 +390,7 @@ var Placemark = declare([P], {
 	
 	setCoords: function(coords, feature) {
 		var esriPoint = makePoint(coords);
-		feature.baseShapes[0].setGeometry(esriPoint);
+		if (feature.baseShapes.length) feature.baseShapes[0].setGeometry(esriPoint);
 		if (feature.textShapes) {
 			feature.textShapes[0].setGeometry(esriPoint);
 		}
