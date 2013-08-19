@@ -316,7 +316,9 @@ return declare([Engine], {
 	},
 	
 	_get_zoom: function() {
-		return this.esriMap.getLevel();
+		var z = this.esriMap.getLevel();
+		// a hack here: a deferred setting initial zoom is resolved but zoom is still -1
+		return z==-1 ? this.map.zoom : z;
 	},
 	
 	_get_extent: function() {
