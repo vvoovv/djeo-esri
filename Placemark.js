@@ -1,6 +1,6 @@
 define([
 	"dojo/_base/declare", // declare
-	"dojo/_base/lang", // mixin, isObject
+	"dojo/_base/lang", // mixin, isObject, isArray
 	"dojo/_base/array", // forEach
 	"dojo/_base/Color",
 	"djeo/_base",
@@ -297,22 +297,25 @@ var Placemark = declare([P], {
 			}, this);
 		}
 
-		var textStyle = P.getTextStyle(feature, calculatedStyle);
-		if (!textStyle) return;
+		var textStyles = P.getTextStyle(feature, calculatedStyle);
+		if (!textStyles) return;
 
-		var label = textStyle.label || this._getLabel(feature, textStyle);
-
-		if (label) {
-			feature.textShapes = [];
-			// ts states for "text style"
-			feature.reg.ts = textStyle;
-			
-			// halo is ignored
-			var graphic = this._makeTextShape(feature, label, textStyle);
-			graphic._djeo = feature;
-			this.text.add(graphic);
-			feature.textShapes.push(graphic);
-		}
+		feature.textShapes = [];
+		//if (!lang.isArray(textStyles)) textStyles = [textStyles];
+		array.forEach(textStyles, function(textStyle){
+			var label = textStyle.label || this._getLabel(feature, textStyle);
+	
+			if (label) {
+				// ts states for "text style"
+				//feature.reg.ts = textStyle;
+				
+				// halo is ignored
+				var graphic = this._makeTextShape(feature, label, textStyle);
+				graphic._djeo = feature;
+				this.text.add(graphic);
+				feature.textShapes.push(graphic);
+			}
+		}, this);
 	},
 	
 	_makeTextShape: function(feature, label, textStyle) {
