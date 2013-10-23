@@ -108,8 +108,10 @@ var Placemark = declare([P], {
 			graphicsLayer = this.engine._getParentLayer(feature)
 		;
 		graphicsLayer.remove(graphic);
-		if (textShapes && textShapes.length) {
-			this.text.remove(textShapes[0]);
+		if (textShapes) {
+			array.forEach(textShapes, function(t) {
+				this.text.remove(t);
+			}, this);
 		}
 	},
 	
