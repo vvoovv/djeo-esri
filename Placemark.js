@@ -303,7 +303,7 @@ var Placemark = declare([P], {
 		if (!textStyles) return;
 
 		feature.textShapes = [];
-		//if (!lang.isArray(textStyles)) textStyles = [textStyles];
+		if (!lang.isArray(textStyles)) textStyles = [textStyles];
 		array.forEach(textStyles, function(textStyle){
 			var label = textStyle.label || this._getLabel(feature, textStyle);
 	
