@@ -214,6 +214,7 @@ return declare([Engine], {
 		var graphic = event.graphic;
 		if (graphic) {
 			var feature = graphic._djeo;
+			if (!feature) return;
 			var handlers = this._eventRegistry[eventType].features[feature.id];
 			if (handlers) {
 				// execute event handlers
